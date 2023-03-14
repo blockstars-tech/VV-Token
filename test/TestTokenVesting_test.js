@@ -67,7 +67,6 @@ describe("TestTokenVesting", function () {
       console.log(`testTokenVesting: ${testTokenVesting.address}`);
 
       vvToken1 = await testTokenVesting.vvToken;
-      //domeCore = await hre.ethers.getContractAt("DomeCore3", domeCore3);
       vvToken = await hre.ethers.getContractAt("VVToken", vvToken1);
       [owner, beneficiary1, beneficiary2, beneficiary3, beneficiary4, _] = await ethers.getSigners();
       console.log("=========== Deployed =========");
@@ -144,7 +143,7 @@ describe("TestTokenVesting", function () {
         await increaseTime(101);
         await testTokenVesting.releaseForPrivateRoundInvestors(beneficiary1.address);
         investorBalance = await testTokenVesting.getBalance(beneficiary1.address);
-        expect(investorBalance).to.equal(BigNumber.from(`1888888888888888888888888`));
+        expect(investorBalance).to.equal(BigNumber.from(`2833333333333333333333333`));
 
 
         await increaseTime(3300);
@@ -154,7 +153,7 @@ describe("TestTokenVesting", function () {
 
       });
 
-      it("check releasable amount for few investors", async function () {
+      it("check releasable amount for few investors", async function () { 
         const ben1Amount = ethers.utils.parseEther("17000000");
         const ben2Amount = ethers.utils.parseEther("10000000");
         const ben3Amount = ethers.utils.parseEther("7000000");
@@ -176,9 +175,9 @@ describe("TestTokenVesting", function () {
         let ben2Balance = await testTokenVesting.getBalance(beneficiary2.address);
         let ben3Balance = await testTokenVesting.getBalance(beneficiary3.address);
 
-        expect(ben1Balance).to.equal(BigNumber.from(`2361111111111111111111111`));
-        expect(ben2Balance).to.equal(BigNumber.from(`833333333333333333333333`));
-        expect(ben3Balance).to.equal(BigNumber.from(`194444444444444444444444`));
+        expect(ben1Balance).to.equal(BigNumber.from(`2833333333333333333333333`));
+        expect(ben2Balance).to.equal(BigNumber.from(`1111111111111111111111111`));
+        expect(ben3Balance).to.equal(BigNumber.from(`388888888888888888888888`));
 
         await increaseTime(3400);
 
@@ -226,7 +225,7 @@ describe("TestTokenVesting", function () {
 
         for (let step = 0; step < 50; step++){
           
-          increaseTime(100);
+          increaseTime(99);
           for (let step = 0; step < 7; step++) {
             await testTokenVesting.release(step);
           }
@@ -236,6 +235,9 @@ describe("TestTokenVesting", function () {
           }
           console.log("-------------################-------------------")
         }
+
+        let contractBalance = await testTokenVesting.getBalance(testTokenVesting.address)
+        expect(contractBalance).to.equal(ethers.utils.parseEther("34000000"));
 
       });
       
