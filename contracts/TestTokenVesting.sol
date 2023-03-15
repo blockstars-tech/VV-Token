@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
 /// Openzeppelin imports
@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// Local imports
 import "./VVToken.sol";
 
-contract TokenVesting is Ownable {
+contract TestTokenVesting is Ownable {
     using SafeERC20 for IERC20;
 
 
@@ -51,7 +51,7 @@ contract TokenVesting is Ownable {
 
     constructor() {
         
-        vvToken = new VVToken("VV Token","$VV");
+        vvToken = new VVToken("Virtual Versions","VV");
 
         vestingSchedules[uint256(VestingScheduleType.Seed)] = VestingSchedule(
             48 * MONTH,
@@ -112,6 +112,7 @@ contract TokenVesting is Ownable {
     }
 
     // Sets start time of the vesting
+
     function startVesting() external onlyOwner{
         require(vestingStartTS == 10000000000, "Vesting start timestamp is already set");
         vestingStartTS = block.timestamp;
@@ -181,14 +182,14 @@ contract TokenVesting is Ownable {
     {
         uint256 currentTime = block.timestamp;
         PrivateRoundInvestor memory _privateRoundInvestor = privateRoundInvestors[_beneficiary];
-        if (currentTime < _privateRoundInvestor.start + slicePeriodSeconds * 2) {
+        if (currentTime < _privateRoundInvestor.start + slicePeriodSeconds) {
             return 0;
         } else if (currentTime >= _privateRoundInvestor.start + vestingSchedules[7].duration) {
             return _privateRoundInvestor.amount - _privateRoundInvestor.released;
         } else {
             uint256 timeFromStart = currentTime - _privateRoundInvestor.start;
             uint256 vestedSlicePeriods = (timeFromStart / slicePeriodSeconds);
-            uint256 vestedSeconds = (vestedSlicePeriods - 1) * slicePeriodSeconds;
+            uint256 vestedSeconds = vestedSlicePeriods * slicePeriodSeconds;
             uint256 vestedAmount = (_privateRoundInvestor.amount *
                 vestedSeconds) / (vestingSchedules[7].duration);
             vestedAmount -= _privateRoundInvestor.released;
@@ -202,17 +203,17 @@ contract TokenVesting is Ownable {
         returns (uint256)
     {
         uint256 currentTime = block.timestamp;
-        if (currentTime < vestingStartTS + slicePeriodSeconds) {
+        if (currentTime < vestingStartTS) {
             return 0;
         } else if (currentTime >= vestingStartTS + vestingSchedule.duration) {
             return vestingSchedule.amount - vestingSchedule.released;
         } else {
             uint256 timeFromStart = currentTime - vestingStartTS;
             uint256 vestedSlicePeriods = (timeFromStart / slicePeriodSeconds);
-            if(vestedSlicePeriods == 1){
+            if(vestedSlicePeriods == 0){
                 return vestingSchedule.zeroRoundAmount;
             }
-            uint256 vestedSeconds = (vestedSlicePeriods - 1) * slicePeriodSeconds;
+            uint256 vestedSeconds = vestedSlicePeriods * slicePeriodSeconds;
             uint256 vestedAmount = ((vestingSchedule.amount - vestingSchedule.zeroRoundAmount) * vestedSeconds) /
                 (vestingSchedule.duration) + vestingSchedule.zeroRoundAmount;
             vestedAmount = vestedAmount - vestingSchedule.released;
@@ -237,6 +238,7 @@ contract TokenVesting is Ownable {
         uint256 currentMonth = ((currenttime - vestingStartTS) / MONTH);
         return currentMonth;
     }
+
     function getBalance(address _beneficiary)public view returns(uint256){
         return vvToken.balanceOf(_beneficiary);
     }
@@ -244,5 +246,5 @@ contract TokenVesting is Ownable {
     receive() external payable {}
 
     fallback() external payable {}
-
+    
 }
