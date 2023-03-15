@@ -211,7 +211,7 @@ contract TestTokenVesting is Ownable {
             uint256 timeFromStart = currentTime - vestingStartTS;
             uint256 vestedSlicePeriods = (timeFromStart / slicePeriodSeconds);
             if(vestedSlicePeriods == 0){
-                return vestingSchedule.zeroRoundAmount;
+                return vestingSchedule.zeroRoundAmount - vestingSchedule.released;
             }
             uint256 vestedSeconds = vestedSlicePeriods * slicePeriodSeconds;
             uint256 vestedAmount = ((vestingSchedule.amount - vestingSchedule.zeroRoundAmount) * vestedSeconds) /
